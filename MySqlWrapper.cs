@@ -133,7 +133,7 @@ public class MySQLWrapper
 		}
 		catch (Exception ex)
 		{
-			await Utilities.SendLogMessage(1, $"# MySqlWraper, SQLExecuteScalar\n{ex}");
+			Console.WriteLine($"# MySqlWrapper, SQLExecuteScalar\n{ex}");
 			return null;
 		}
 	}
@@ -160,7 +160,7 @@ public class MySQLWrapper
 		}
 		catch (Exception exception)
 		{
-			await Utilities.SendLogMessage(1, $"# MySqlWraper, SQLExecuteNonQuery\n{exception.Message}");
+			Console.WriteLine($"# MySqlWrapper, SQLExecuteNonQuery\n{exception.Message}");
 			return 0;
 		}
 	}
@@ -202,7 +202,7 @@ public class MySQLWrapper
 		}
 		catch (Exception exception)
 		{
-			await Utilities.SendLogMessage(1, $"# MySqlWraper, SQLExecuteReader\n{exception}");
+			Console.WriteLine($"# MySqlWrapper, SQLExecuteReader\n{exception}");
 			return new List<dynamic>();
 		}
 	}
@@ -239,7 +239,7 @@ public class MySQLWrapper
 		}
 		catch (Exception exception)
 		{
-			await Utilities.SendLogMessage(1, $"# MySqlWraper, SQLExecuteColumnReader\n{exception}");
+			Console.WriteLine($"# MySqlWrapper, SQLExecuteColumnReader\n{exception}");
 			return new List<T> { };
 		}
 	}
@@ -254,15 +254,15 @@ public class MySQLWrapper
 	/// 1 = To add amount.<br/>
 	/// 2 = To remove amount.
 	/// </summary>
-	public static async Task<bool> SetIntegerForDB(string table, string column, ulong userId, int integer, int setting, bool canBeNegative)
+	public static async Task<bool> SetIntegerForDB(string table, string column, string valueName, object valueObject, ulong userId, int integer, int setting, bool canBeNegative)
 	{
 		object currentAmount = await SQLExecuteScalar(1,
-			$"SELECT `{column}` FROM `{table}` WHERE `user_id` = @user_id",
-			new Dictionary<string, object>() { { "user_id", userId } });
+			$"SELECT `{column}` FROM `{table}` WHERE `{valueName}` = @value",
+			new Dictionary<string, object>() { { "value", valueObject } });
 
 		if (currentAmount == null)
 		{
-			await Utilities.SendLogMessage(1, $"# RPGManager, SetIntegerForDB\ncould not get current amount from database.\n User id ||{userId}|| and table `{table}` and column `{column}`.");
+			Console.WriteLine($"# MySqlWrapper, SetIntegerForDB\nCould not get current amount from database.\nUser id ||{userId}|| and table `{table}` and column `{column}`.");
 			return false;
 		}
 
@@ -279,8 +279,8 @@ public class MySQLWrapper
 			newAmount = integer;
 
 		int updateCount = await SQLExecuteNonQuery(1,
-			$"UPDATE `{table}` SET `{column}` = @column WHERE `user_id` = @user_id",
-			new Dictionary<string, object>() { { "user_id", userId }, { "column", newAmount } });
+			$"UPDATE `{table}` SET `{column}` = @column WHERE `{valueName}` = @value",
+			new Dictionary<string, object>() { { "value", valueObject }, { "column", newAmount } });
 
 		if (updateCount == 0)
 			return false;

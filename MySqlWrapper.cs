@@ -40,7 +40,7 @@ public class MySQLWrapper
 	/// Streamreader and xml serializer to read data from Config.xml.
 	/// </summary>
 	/// <returns>Data from config in given type.</returns>
-	public static T ReadFromCharacterData<T>() where T : new()
+	public static T ReadFromXMLData<T>() where T : new()
 	{
 		TextReader reader = null;
 
@@ -62,7 +62,7 @@ public class MySQLWrapper
 	/// </summary>
 	public static void ReadDataBaseStrings()
 	{
-		DataBase data = ReadFromCharacterData<DataBase>();
+		DataBase data = ReadFromXMLData<DataBase>();
 
 		mySqlConnectionString = data.ConnectionString;
 

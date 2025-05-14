@@ -75,7 +75,7 @@ public class MySQLWrapper
 	/// <summary>
 	/// Got the data base connection string based on an id.
 	/// </summary>
-	private static string GetDataBaseConnectionString(int dataBaseId)
+	private static string GetDataBaseConnectionString()
 	{
 		string connectionString = mySqlConnectionString;
 
@@ -118,7 +118,7 @@ public class MySQLWrapper
 	{
 		try
 		{
-			string connectionString = GetDataBaseConnectionString(dataBaseId);
+			string connectionString = GetDataBaseConnectionString();
 			MySqlConnection sql_connection = new MySqlConnection(connectionString);
 
 			await sql_connection.OpenAsync();
@@ -148,7 +148,7 @@ public class MySQLWrapper
 	{
 		try
 		{
-			string connectionString = GetDataBaseConnectionString(dataBaseId);
+			string connectionString = GetDataBaseConnectionString();
 
 			MySqlConnection sql_connection = new MySqlConnection(connectionString);
 			await sql_connection.OpenAsync();
@@ -175,7 +175,7 @@ public class MySQLWrapper
 		try
 		{
 			List<dynamic> result = new List<dynamic>();
-			string connectionString = GetDataBaseConnectionString(dataBaseId);
+			string connectionString = GetDataBaseConnectionString();
 			MySqlConnection sql_connection = new MySqlConnection(connectionString);
 
 			await sql_connection.OpenAsync();
@@ -218,7 +218,7 @@ public class MySQLWrapper
 		try
 		{
 			List<T> result = new List<T>();
-			string connectionString = GetDataBaseConnectionString(dataBaseId);
+			string connectionString = GetDataBaseConnectionString();
 			MySqlConnection sql_connection = new MySqlConnection(connectionString);
 
 			await sql_connection.OpenAsync();

@@ -32,6 +32,9 @@ using MySqlConnector;
 /// </summary>
 public class MySQLWrapper
 {
+	/// <summary>
+	/// This string contains the data base connection data: adress, user and password.
+	/// </summary>
 	private static string mySqlConnectionString;
 
 
@@ -74,12 +77,10 @@ public class MySQLWrapper
 	/// </summary>
 	private static string GetDataBaseConnectionString(int dataBaseId)
 	{
-		string connectionString = string.Empty;
-
-		if (dataBaseId == 1) connectionString = mySqlConnectionString;
+		string connectionString = mysql_connection;
 
 		if (connectionString == string.Empty)
-			throw new ArgumentOutOfRangeException(nameof(connectionString), $"[Error {DateTime.Now.ToShortTimeString()}] Database connection string could not be found.");
+    			throw new ArgumentOutOfRangeException(nameof(connectionString), $"[Error {DateTime.Now.ToShortTimeString()}] Database connection string could not be found.");
 
 		return connectionString;
 	}
@@ -247,46 +248,49 @@ public class MySQLWrapper
 
 
 
+	#region Sql functions
 	/// <summary>
-	/// This function is setting, adding or removing integer amounts from a table and column in database that is related to a user id.<para/>
+	/// This function is setting, adding or removing integer amounts from a table and column in database that is related to the given identifier<para/>
 	/// Returns false if updated could not be saved.<para/>
 	/// 0 = To set amount.<br/>
 	/// 1 = To add amount.<br/>
 	/// 2 = To remove amount.
 	/// </summary>
-	public static async Task<bool> SetIntegerForDB(string table, string column, string valueName, object valueObject, ulong userId, int integer, int setting, bool canBeNegative)
+	public static async Task<bool> SetIntegerForIdentifier(string table, string targetColumn, string whereColumn, ulong identifier, int integer, int setting, bool canBeNegative)
 	{
-		object currentAmount = await SQLExecuteScalar(1,
-			$"SELECT `{column}` FROM `{table}` WHERE `{valueName}` = @value",
-			new Dictionary<string, object>() { { "value", valueObject } });
-
-		if (currentAmount == null)
-		{
-			Console.WriteLine($"# MySqlWrapper, SetIntegerForDB\nCould not get current amount from database.\nUser id ||{userId}|| and table `{table}` and column `{column}`.");
-			return false;
-		}
-
-		int newAmount;
-
-		if (setting == 1)
-			newAmount = Convert.ToInt32(currentAmount) + integer;
-		else if (setting == 2)
-		{
-			newAmount = Convert.ToInt32(currentAmount) - integer;
-			if (newAmount < 0 && !canBeNegative) newAmount = 0; // we dont want negative integer in every case
-		}
-		else
-			newAmount = integer;
-
-		int updateCount = await SQLExecuteNonQuery(1,
-			$"UPDATE `{table}` SET `{column}` = @column WHERE `{valueName}` = @value",
-			new Dictionary<string, object>() { { "value", valueObject }, { "column", newAmount } });
-
-		if (updateCount == 0)
-			return false;
-		else
-			return true;
+	    object currentAmount = await SQLExecuteScalar(
+	        $"SELECT `{targetColumn}` FROM `{table}` WHERE `{whereColumn}` = @id",
+	        new Dictionary<string, object>() { { "id", identifier } });
+	
+	    if (currentAmount == null)
+	    {
+	        await Utilities.SendLogMessage(1, $"# MySqlWrapper, SetIntegerForDB\nCould not get current amount from database.\n" +
+	            $"Id ||{identifier}|| and table `{table}` and column `{targetColumn}`.");
+	        return false;
+	    }
+	
+	    int newAmount;
+	
+	    if (setting == 1)
+	        newAmount = Convert.ToInt32(currentAmount) + integer;
+	    else if (setting == 2)
+	    {
+	        newAmount = Convert.ToInt32(currentAmount) - integer;
+	        if (newAmount < 0 && !canBeNegative) newAmount = 0; // we dont want negative integer in every case
+	    }
+	    else
+	        newAmount = integer;
+	
+	    int updateCount = await SQLExecuteNonQuery(
+	        $"UPDATE `{table}` SET `{targetColumn}` = @column WHERE `{whereColumn}` = @id",
+	        new Dictionary<string, object>() { { "id", identifier }, { "column", newAmount } });
+	
+	    if (updateCount == 0)
+	        return false;
+	    else
+	        return true;
 	}
+	#endregion
 }
 
 

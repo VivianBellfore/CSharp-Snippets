@@ -27,6 +27,6 @@ It should be in the same folder path or you need to change the `StreamReader` pa
 ## Initialize
 On start of your project or on some point, before you want to use the wrapper, you have to fetch the connection data like this:
 ```cs
-MySQLWrapper.ReadDataBaseStrings();
-DataBase data = MySQLWrapper.ReadFromCharacterData<DataBase>();
+MySqlWrapper.ReadDataBaseStrings();
+DataBase data = MySqlWrapper.ReadFromXMLData<DataBase>();
 ```

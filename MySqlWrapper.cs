@@ -77,7 +77,7 @@ public class MySQLWrapper
 	/// </summary>
 	private static string GetDataBaseConnectionString(int dataBaseId)
 	{
-		string connectionString = mysql_connection;
+		string connectionString = mySqlConnectionString;
 
 		if (connectionString == string.Empty)
     			throw new ArgumentOutOfRangeException(nameof(connectionString), $"[Error {DateTime.Now.ToShortTimeString()}] Database connection string could not be found.");
@@ -264,8 +264,7 @@ public class MySQLWrapper
 	
 	    if (currentAmount == null)
 	    {
-	        await Utilities.SendLogMessage(1, $"# MySqlWrapper, SetIntegerForDB\nCould not get current amount from database.\n" +
-	            $"Id ||{identifier}|| and table `{table}` and column `{targetColumn}`.");
+	        Console.WriteLine($"Could not get current amount from database.\nId ||{identifier}|| and table `{table}` and column `{targetColumn}`.");
 	        return false;
 	    }
 	

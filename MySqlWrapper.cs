@@ -30,7 +30,7 @@ using MySqlConnector;
 /// <summary>
 /// This class is handeling all data base functions for sql and xml.
 /// </summary>
-public class MySQLWrapper
+public class MySqlWrapper
 {
 	/// <summary>
 	/// This string contains the data base connection data: adress, user and password.

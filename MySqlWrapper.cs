@@ -114,7 +114,7 @@ public class MySQLWrapper
 	/// <summary>
 	/// This functon returns first column of the first row in the result set, or a null reference if the result set is empty. Returns a maximum of 2033 characters.
 	/// </summary>
-	public static async Task<object> SQLExecuteScalar(int dataBaseId, string sqlStatment, Dictionary<string, object> arguments = null)
+	public static async Task<object> SQLExecuteScalar(string sqlStatment, Dictionary<string, object> arguments = null)
 	{
 		try
 		{
@@ -144,7 +144,7 @@ public class MySQLWrapper
 	/// Returning:<br/>
 	/// int - number of rows that was updated/inserted/deleted.
 	/// </summary>
-	public static async Task<int> SQLExecuteNonQuery(int dataBaseId, string sqlStatment, Dictionary<string, object> arguments = null)
+	public static async Task<int> SQLExecuteNonQuery(string sqlStatment, Dictionary<string, object> arguments = null)
 	{
 		try
 		{
@@ -170,7 +170,7 @@ public class MySQLWrapper
 	/// Sends the CommandText to the Connection and builds a SqlDataReader. Gives back a dynamic List of objects.<para/>
 	/// Values can be get by the column name of the data.
 	/// </summary>
-	public static async Task<List<dynamic>> SQLExecuteReader(int dataBaseId, string sqlStatment, Dictionary<string, object> arguments = null)
+	public static async Task<List<dynamic>> SQLExecuteReader(string sqlStatment, Dictionary<string, object> arguments = null)
 	{
 		try
 		{
@@ -213,7 +213,7 @@ public class MySQLWrapper
 	/// If no column is called (*) it will give back the content from the first column in the table.<para/>
 	/// Returns an empty list, if nothing is found.
 	/// </summary>
-	public static async Task<List<T>> SQLExecuteColumnReader<T>(int dataBaseId, string sqlStatment, Dictionary<string, object> arguments = null)
+	public static async Task<List<T>> SQLExecuteColumnReader<T>(string sqlStatment, Dictionary<string, object> arguments = null)
 	{
 		try
 		{

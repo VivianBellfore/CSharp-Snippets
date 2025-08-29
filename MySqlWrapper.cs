@@ -16,10 +16,9 @@
 
 
 using System;
-using System.IO;
+using System.Linq;
 using System.Dynamic;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 using System.Collections.Generic;
 
 using MySqlConnector;
@@ -33,58 +32,9 @@ using MySqlConnector;
 public class MySqlWrapper
 {
 	/// <summary>
-	/// This string contains the data base connection data: adress, user and password.
+	/// Contains the mysql database connection data: adress, port, user and password.
 	/// </summary>
-	private static string mySqlConnectionString;
-
-
-	#region XML
-	/// <summary>
-	/// Streamreader and xml serializer to read data from Config.xml.
-	/// </summary>
-	/// <returns>Data from config in given type.</returns>
-	public static T ReadFromXMLData<T>() where T : new()
-	{
-		TextReader reader = null;
-
-		try
-		{
-			var serializer = new XmlSerializer(typeof(T));
-			reader = new StreamReader("Config.xml");
-
-			return (T)serializer.Deserialize(reader);
-		}
-		finally
-		{
-			reader.Close();
-		}
-	}
-
-	/// <summary>
-	/// Setup SQL connection strings for all data bases.
-	/// </summary>
-	public static void ReadDataBaseStrings()
-	{
-		DataBase data = ReadFromXMLData<DataBase>();
-
-		mySqlConnectionString = data.ConnectionString;
-
-		Console.WriteLine($"[Info {DateTime.Now.ToShortTimeString()}] Database connection strings are setup.");
-	}
-
-	/// <summary>
-	/// Got the data base connection string based on an id.
-	/// </summary>
-	private static string GetDataBaseConnectionString()
-	{
-		string connectionString = mySqlConnectionString;
-
-		if (connectionString == string.Empty)
-    			throw new ArgumentOutOfRangeException(nameof(connectionString), $"[Error {DateTime.Now.ToShortTimeString()}] Database connection string could not be found.");
-
-		return connectionString;
-	}
-	#endregion
+	private static string mysql_connection = "Server=IPADRESS;Database=DBNAME;Uid=USERID;Pwd=PASSWORD;";
 
 
 
@@ -118,23 +68,19 @@ public class MySqlWrapper
 	{
 		try
 		{
-			string connectionString = GetDataBaseConnectionString();
-			MySqlConnection sql_connection = new MySqlConnection(connectionString);
+			MySqlConnection sql_connection = new MySqlConnection(mysql_connection);
 
 			await sql_connection.OpenAsync();
 			MySqlCommand cmd = BuildMySqlCommand(sql_connection, sqlStatment, arguments);
 			object result = await cmd.ExecuteScalarAsync();
 			await sql_connection.CloseAsync();
 
-			if (result == DBNull.Value)
-				return null;
-			else
-				return result;
+			return result is DBNull ? null : result;
 
 		}
-		catch (Exception ex)
+		catch (Exception exception)
 		{
-			Console.WriteLine($"# MySqlWrapper, SQLExecuteScalar\n{ex}");
+			// Send an error to your system like: $"MySqlWrapper, SQLExecuteScalar\n{exception}"
 			return null;
 		}
 	}
@@ -148,9 +94,7 @@ public class MySqlWrapper
 	{
 		try
 		{
-			string connectionString = GetDataBaseConnectionString();
-
-			MySqlConnection sql_connection = new MySqlConnection(connectionString);
+			MySqlConnection sql_connection = new MySqlConnection(mysql_connection);
 			await sql_connection.OpenAsync();
 			MySqlCommand cmd = BuildMySqlCommand(sql_connection, sqlStatment, arguments);
 
@@ -161,7 +105,7 @@ public class MySqlWrapper
 		}
 		catch (Exception exception)
 		{
-			Console.WriteLine($"# MySqlWrapper, SQLExecuteNonQuery\n{exception.Message}");
+			// Send an error to your system like: $"MySqlWrapper, SQLExecuteNonQuery\n{exception}"
 			return 0;
 		}
 	}
@@ -175,8 +119,7 @@ public class MySqlWrapper
 		try
 		{
 			List<dynamic> result = new List<dynamic>();
-			string connectionString = GetDataBaseConnectionString();
-			MySqlConnection sql_connection = new MySqlConnection(connectionString);
+			MySqlConnection sql_connection = new MySqlConnection(mysql_connection);
 
 			await sql_connection.OpenAsync();
 			MySqlCommand cmd = BuildMySqlCommand(sql_connection, sqlStatment, arguments);
@@ -203,7 +146,7 @@ public class MySqlWrapper
 		}
 		catch (Exception exception)
 		{
-			Console.WriteLine($"# MySqlWrapper, SQLExecuteReader\n{exception}");
+			// Send an error to your system like: $"MySqlWrapper, SQLExecuteReader\n{exception}"
 			return new List<dynamic>();
 		}
 	}
@@ -218,8 +161,7 @@ public class MySqlWrapper
 		try
 		{
 			List<T> result = new List<T>();
-			string connectionString = GetDataBaseConnectionString();
-			MySqlConnection sql_connection = new MySqlConnection(connectionString);
+			MySqlConnection sql_connection = new MySqlConnection(mysql_connection);
 
 			await sql_connection.OpenAsync();
 			MySqlCommand cmd = BuildMySqlCommand(sql_connection, sqlStatment, arguments);
@@ -240,7 +182,7 @@ public class MySqlWrapper
 		}
 		catch (Exception exception)
 		{
-			Console.WriteLine($"# MySqlWrapper, SQLExecuteColumnReader\n{exception}");
+			// Send an error to your system like: $"MySqlWrapper, SQLExecuteColumnReader\n{exception}"
 			return new List<T> { };
 		}
 	}
@@ -250,21 +192,21 @@ public class MySqlWrapper
 
 	#region Sql functions
 	/// <summary>
-	/// This function is setting, adding or removing integer amounts from a table and column in database that is related to the given identifier<para/>
+	/// Setting, adding or removing integer for an existing table and column in database that is related to the given identifier.<para/>
 	/// Returns false if updated could not be saved.<para/>
 	/// 0 = To set amount.<br/>
 	/// 1 = To add amount.<br/>
-	/// 2 = To remove amount.
+	/// 2 = To remove amount.<para/>
 	/// </summary>
-	public static async Task<bool> SetIntegerForIdentifier(string table, string targetColumn, string whereColumn, ulong identifier, int integer, int setting, bool canBeNegative)
+	internal static async Task<bool> SetIntegerForIdentifier(string table, string targetColumn, Dictionary<string, object> whereConditions, int integer, int setting, bool canBeNegative)
 	{
-	    object currentAmount = await SQLExecuteScalar(
-	        $"SELECT `{targetColumn}` FROM `{table}` WHERE `{whereColumn}` = @id",
-	        new Dictionary<string, object>() { { "id", identifier } });
+	    string whereClause = string.Join(" AND ", whereConditions.Keys.Select(key => $"`{key}` = @{key}"));
+	
+	    object currentAmount = await SQLExecuteScalar( $"SELECT `{targetColumn}` FROM `{table}` WHERE {whereClause}", whereConditions);
 	
 	    if (currentAmount == null)
 	    {
-	        Console.WriteLine($"Could not get current amount from database.\nId ||{identifier}|| and table `{table}` and column `{targetColumn}`.");
+	        // Send an error to your system like: $"Could not get current amount from database.\nTable: `{table}`, Column: `{targetColumn}`."
 	        return false;
 	    }
 	
@@ -275,29 +217,17 @@ public class MySqlWrapper
 	    else if (setting == 2)
 	    {
 	        newAmount = Convert.ToInt32(currentAmount) - integer;
-	        if (newAmount < 0 && !canBeNegative) newAmount = 0; // we dont want negative integer in every case
+	        if (newAmount < 0 && !canBeNegative)
+	            newAmount = 0;
 	    }
 	    else
 	        newAmount = integer;
 	
-	    int updateCount = await SQLExecuteNonQuery(
-	        $"UPDATE `{table}` SET `{targetColumn}` = @column WHERE `{whereColumn}` = @id",
-	        new Dictionary<string, object>() { { "id", identifier }, { "column", newAmount } });
+	    var updateParameters = new Dictionary<string, object>() { { "ccolumn", newAmount } };
 	
-	    if (updateCount == 0)
-	        return false;
-	    else
-	        return true;
+	    int updateCount = await SQLExecuteNonQuery( $"UPDATE `{table}` SET `{targetColumn}` = @column WHERE {whereClause}", updateParameters);
+	
+	    return updateCount > 0;
 	}
 	#endregion
 }
-
-
-/// <summary>
-/// This class is building an object for our data base connection information.
-/// </summary>
-public class DataBase
-{
-	public string ConnectionString { get; set; }
-}
-

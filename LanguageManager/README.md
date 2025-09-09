@@ -25,8 +25,25 @@ The user identifier is currently a ulong, change it in `cachedUserLanguages` at 
 If you have multiple or changing system languages then you can set it with `SetSystemLanguage`.
 
 <br>
+
+How to use it for a user with a saved id:<br>
+`string translation = await LanguageManager.GetTranslation("dataSaved", User.Id);`
+
+How to use it for a system language message:<br>
+`string translation = await LanguageManager.GetTranslation("dataSaved", 0, LanguageManager.systemLanguage);`
+
+How to use it with parameter:<br>
+`string translation = await LanguageManager.GetTranslation("dataSaved", 0, LanguageManager.systemLanguage, para1, para2);`<br>
+or<br>
+`string translation = await LanguageManager.GetTranslation("dataSaved", User.Id, LanguageManager.systemLanguage, para1, para2);`
+
+How to use a specific language:<br>
+`string translation = await LanguageManager.GetTranslation("dataSaved", 0, "LANGUAGENAMEHERE");`<br>
+
+<br>
 <br>
 
 # Adding language
 Just copy the `english.cs` and change the file and class name to the language you want to add. Every language name needs to be unique!
+
 Change the translation text ( second string entry ) but not the text id ( first string entry ).

@@ -89,8 +89,15 @@ namespace YOURNAMESPACEHERE
         {
             if ( userId != 0)
                 language = await GetUserLanguage(userId);
+			
+			Dictionary<string, string> usedLanguage;
 
-            Dictionary<string, string> usedLanguage = languages[language];
+			if ( languages.ContainsKey(language) )
+            	usedLanguage = languages[language];
+			else if ( languages.ContainsKey(systemLanguage) )
+				usedLanguage = languages[systemLanguage];
+			else
+				return $"Missing Translation! Text id was \"{textId}\".";
 
             if (usedLanguage.ContainsKey(textId))
                 return args.Length > 0 ? string.Format(usedLanguage[textId], args) : usedLanguage[textId];
@@ -122,3 +129,4 @@ namespace YOURNAMESPACEHERE
         }
     }
 }
+

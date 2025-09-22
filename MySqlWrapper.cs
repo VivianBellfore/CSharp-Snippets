@@ -223,7 +223,8 @@ public class MySqlWrapper
 	    else
 	        newAmount = integer;
 	
-	    var updateParameters = new Dictionary<string, object>() { { "column", newAmount } };
+	    var updateParameters = whereConditions;
+		updateParameters.Add("column", newAmount);
 	
 	    int updateCount = await SQLExecuteNonQuery( $"UPDATE `{table}` SET `{targetColumn}` = @column WHERE {whereClause}", updateParameters);
 	
@@ -231,4 +232,5 @@ public class MySqlWrapper
 	}
 	#endregion
 }
+
 

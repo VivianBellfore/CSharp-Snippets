@@ -8,36 +8,36 @@ using System.Collections.Generic;
 namespace YOURNAMESPACEHERE
 {
     /// <summary>
-    /// Managing the system or user language and translation.
+    /// Managing the system and user language for translations.
     /// </summary>
     internal class LanguageManager
     {
         // You need to change some things yourself:
-		// - Line 27, change the default language if it should not be english.
-        // - Line 45, the name of the namespace you are using.
-		// - Line 68, Change the database SQL statement for your user language system.
-		// - Line 106, update your user language if you have stored it somewhere.
-		// - Line 119, save or update your system language if you want to store it.
+		// - Line 24, change the default language if it should not be english.
+		// - line 45, change name space.
 
 
 		
 		/// <summary>
-        /// Holding the system language id.
-        /// </summary>
+		/// Default system language id.
+		/// </summary>
 		internal static string systemLanguage = "english";
 		
         /// <summary>
-        /// Holding user language data.
-        /// </summary>
-        internal static Dictionary<ulong, string> cachedUserLanguages = new Dictionary<ulong, string>();
+		/// Caching user language data.<para/>
+		/// </summary>
+		internal static Dictionary<ulong, string> cachedUserLanguages = new Dictionary<ulong, string>();
 
         /// <summary>
-        /// Contains all registered languages.
-        /// </summary>
-        public static Dictionary<string, Dictionary<string, string>> languages = new Dictionary<string, Dictionary<string, string>>();
+		/// Contains all registered languages.
+		/// </summary>
+		public static Dictionary<string, Dictionary<string, string>> languages = new Dictionary<string, Dictionary<string, string>>();
 
 
 
+		/// <summary>
+		/// Getting all langues from the assembly.
+		/// </summary>
         public static void LoadLanguages()
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
@@ -54,6 +54,14 @@ namespace YOURNAMESPACEHERE
                     languages.Add(languageName, dict);
                 }
             }
+
+			// If you are storing your system language in a data base then fetch it here like this:
+			//object result = await MySqlWrapper.SQLExecuteScalar(
+    			//"SELECT `language` FROM `guild_data`",
+    			//new Dictionary<string, object> { });
+
+			//if (result != null)
+			    //systemLanguage = Convert.ToString(result);
         }
 
         /// <summary>
@@ -65,7 +73,14 @@ namespace YOURNAMESPACEHERE
             if (cachedUserLanguages.ContainsKey(userId))
                 return cachedUserLanguages[userId];
 
-            object language = null; // Add the user language here instead of giving null if you have stored it somewhere.
+            object language = null;
+			// Add the user language here instead of giving null if you have stored it somewhere. Like from a data base:
+			//object language = await MySqlWrapper.SQLExecuteScalar(
+    			//"SELECT `language` FROM `user_profile` WHERE `user_id` = user_id",
+    			//new Dictionary<string, object>() { { "user_id", userId } });
+
+			//if ( language == null )
+				// Your error message system here.
 
             if (language == null)
             {
@@ -74,8 +89,8 @@ namespace YOURNAMESPACEHERE
             }
             else
             {
-                cachedUserLanguages.Add(userId, language.ToString());
-                return language.ToString();
+                cachedUserLanguages.Add(userId, Convert.ToString(language));
+                return Convert.ToString(language);
             }
         }
 
@@ -110,7 +125,13 @@ namespace YOURNAMESPACEHERE
         /// </summary>
         internal static async Task SetUserLanguage(string language, ulong userId)
         {
-            // Add a database update here if you want to store it at the same time.
+            // Add a database update here if you want to store it at the same time. Like this:
+			//int updateCount = await MySqlWrapper.SQLExecuteNonQuery(
+    			//"UPDATE `user_profile` SET `language` = @language WHERE `user_id` = @user_id",
+    			//new Dictionary<string, object>() { { "user_id", userId }, { "language", language } });
+
+			//if ( updateCount <= 0 )
+				// Your error message system here.
 
             if (cachedUserLanguages.ContainsKey(userId))
                 cachedUserLanguages[userId] = language;
@@ -123,10 +144,17 @@ namespace YOURNAMESPACEHERE
         /// </summary>
         internal static async Task SetSystemLanguage(string language)
         {
-            // Add or update a your system language here if you want to store it at the same time.
+            // Add or update a your system language here if you want to store it at the same time. Like this:
+			//int updateCount = await MySqlWrapper.SQLExecuteNonQuery(
+    			//"UPDATE `guild_data` SET `language` = @language WHERE `guild_id` = @guild_id",
+    			//new Dictionary<string, object>() { { "guild_id", guildId }, { "language", language } });
+
+			//if ( updateCount <= 0 )
+				// Your error message system here.
 			
 			systemLanguage = language;
         }
     }
 }
+
 

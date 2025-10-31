@@ -8,11 +8,9 @@ It is mainly made for a system where every user has saved there own language fro
 
 # Installation and usage
 After adding this folder to your project you need to change some things in the `LanuageManager.cs`:
-- Line 27, change the default language if it should not be english.
+- Line 24, change the default language if it should not be english.
 - Line 45, the name of the namespace you are using.
-- Line 68, Change the database SQL statement for your user language system.
-- Line 106, update your user language if you have stored it somewhere.
-- Line 119, save or update your system language if you want to store it.
+
 
 And change the namespaces in the language `.cs` files also.
 
@@ -47,3 +45,4 @@ How to use a specific language:<br>
 Just copy the `english.cs` and change the file and class name to the language you want to add. Every language name needs to be unique!
 
 Change the translation text ( second string entry ) but not the text id ( first string entry ).
+
